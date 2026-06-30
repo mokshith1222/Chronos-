@@ -9,7 +9,7 @@ import { Download, Upload, AlertTriangle, Cloud, Copy, RefreshCw, Check } from "
 import { useWorkspaceStore } from "@/stores/workspace-store"
 
 export function DataSettings() {
-  const { workspaceId, setWorkspace } = useWorkspaceStore()
+  const { workspaceId, setWorkspace, disconnectWorkspace } = useWorkspaceStore()
   const [isExporting, setIsExporting] = React.useState(false)
   const [isImporting, setIsImporting] = React.useState(false)
   const [isResetting, setIsResetting] = React.useState(false)
@@ -30,6 +30,31 @@ export function DataSettings() {
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error(err)
+    }
+  }
+
+  // Disconnect Workspace
+  const handleDisconnect = async () => {
+    if (!window.confirm("Are you sure you want to disconnect? This device will stop syncing with your other devices and will generate a brand new, empty private workspace.")) {
+      return
+    }
+
+    setIsSyncing(true)
+    try {
+      await disconnectWorkspace()
+      toast.success("Disconnected Successfully", {
+        description: "Generated a new private workspace for this device. Reloading...",
+      })
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    } catch (err) {
+      console.error(err)
+      toast.error("Failed to Disconnect", {
+        description: "An error occurred while disconnecting the workspace.",
+      })
+    } finally {
+      setIsSyncing(false)
     }
   }
 
@@ -186,8 +211,19 @@ export function DataSettings() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Current Workspace ID */}
-          <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-muted/40 border">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">This Device's Workspace ID</span>
+          <div className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-muted/40 border">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">This Device's Workspace ID</span>
+              <Button 
+                variant="link" 
+                size="sm" 
+                onClick={handleDisconnect}
+                disabled={isSyncing}
+                className="h-auto p-0 text-[10px] font-bold text-destructive hover:text-destructive/80 shrink-0"
+              >
+                Disconnect & Reset
+              </Button>
+            </div>
             <div className="flex items-center gap-2">
               <code className="text-xs font-mono select-all break-all flex-1 text-foreground">
                 {workspaceId || "Loading..."}

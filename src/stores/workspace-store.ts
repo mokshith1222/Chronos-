@@ -7,6 +7,7 @@ interface WorkspaceState {
   setWorkspace: (workspaceId: string, userId?: string) => void
   clearWorkspace: () => void
   initializeWorkspace: () => Promise<string>
+  disconnectWorkspace: () => Promise<void>
 }
 
 export const useWorkspaceStore = create<WorkspaceState>()(
@@ -44,6 +45,18 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           console.error("Failed to initialize workspace:", e)
         }
         return "default-workspace"
+      },
+      disconnectWorkspace: async () => {
+        try {
+          // Create a brand new workspace and user to disconnect from the shared one
+          const res = await fetch("/api/workspaces/init", { method: "POST" })
+          if (res.ok) {
+            const data = await res.json()
+            set({ workspaceId: data.workspaceId, userId: data.userId })
+          }
+        } catch (e) {
+          console.error("Failed to disconnect workspace:", e)
+        }
       },
     }),
     {
