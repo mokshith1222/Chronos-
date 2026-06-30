@@ -2,15 +2,67 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { Download, Upload, AlertTriangle, Cloud } from "lucide-react"
+import { Download, Upload, AlertTriangle, Cloud, Copy, RefreshCw, Check } from "lucide-react"
+import { useWorkspaceStore } from "@/stores/workspace-store"
 
 export function DataSettings() {
+  const { workspaceId, setWorkspace } = useWorkspaceStore()
   const [isExporting, setIsExporting] = React.useState(false)
   const [isImporting, setIsImporting] = React.useState(false)
   const [isResetting, setIsResetting] = React.useState(false)
+  const [copied, setCopied] = React.useState(false)
+  const [syncId, setSyncId] = React.useState("")
+  const [isSyncing, setIsSyncing] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  // Copy Workspace ID
+  const handleCopyId = async () => {
+    if (!workspaceId) return
+    try {
+      await navigator.clipboard.writeText(workspaceId)
+      setCopied(true)
+      toast.success("Workspace ID Copied", {
+        description: "Paste this ID on your other devices to sync them.",
+      })
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  // Connect to another Workspace
+  const handleSyncWorkspace = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!syncId.trim()) return
+
+    setIsSyncing(true)
+    try {
+      const res = await fetch(`/api/workspaces/init?workspaceId=${syncId.trim()}`)
+      if (!res.ok) {
+        throw new Error("Workspace not found")
+      }
+      
+      const data = await res.json()
+      setWorkspace(data.workspaceId)
+      
+      toast.success("Workspace Connected", {
+        description: "Successfully synced with the new workspace. Reloading...",
+      })
+
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    } catch (err) {
+      toast.error("Connection Failed", {
+        description: "Could not find a workspace with that ID. Please check the spelling.",
+      })
+    } finally {
+      setIsSyncing(false)
+    }
+  }
 
   // 1. Export Backup
   const handleExport = async () => {
@@ -121,6 +173,52 @@ export function DataSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Workspace Sync */}
+      <Card className="rounded-2xl border bg-card">
+        <CardHeader>
+          <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+            <RefreshCw className="size-4 text-primary animate-spin-slow" />
+            Workspace Sync
+          </CardTitle>
+          <CardDescription className="text-[11px]">
+            Chronos is local-first. Every device gets its own secure workspace by default. You can link them below.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Current Workspace ID */}
+          <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-muted/40 border">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">This Device's Workspace ID</span>
+            <div className="flex items-center gap-2">
+              <code className="text-xs font-mono select-all break-all flex-1 text-foreground">
+                {workspaceId || "Loading..."}
+              </code>
+              <Button variant="ghost" size="icon" onClick={handleCopyId} className="size-8 rounded-lg shrink-0">
+                {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+              </Button>
+            </div>
+          </div>
+
+          {/* Sync form */}
+          <form onSubmit={handleSyncWorkspace} className="space-y-3 pt-2 border-t border-border/50">
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-foreground">Connect to Another Device</span>
+              <p className="text-[10px] text-muted-foreground">Enter the Workspace ID from your other device (e.g. your laptop) to share the same data here.</p>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter Workspace ID"
+                value={syncId}
+                onChange={(e) => setSyncId(e.target.value)}
+                className="rounded-xl text-xs h-9 bg-background border-border/50"
+              />
+              <Button type="submit" size="sm" disabled={isSyncing} className="rounded-xl shrink-0">
+                Connect
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
       {/* Backup & Restore */}
       <Card className="rounded-2xl border bg-card">
         <CardHeader>
