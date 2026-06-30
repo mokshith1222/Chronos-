@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 
-async function getOrCreateUser() {
+async function getOrCreateUser(userId?: string | null) {
+  if (userId) {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+    })
+    if (user) return user
+  }
+
   let user = await db.user.findFirst()
   if (!user) {
     user = await db.user.create({
@@ -16,7 +23,9 @@ async function getOrCreateUser() {
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getOrCreateUser()
+    const { searchParams } = new URL(req.url)
+    const userId = searchParams.get("userId")
+    const user = await getOrCreateUser(userId)
     return NextResponse.json(user)
   } catch (error) {
     console.error("[USER_GET]", error)
@@ -26,7 +35,10 @@ export async function GET(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const user = await getOrCreateUser()
+    const { searchParams } = new URL(req.url)
+    const userId = searchParams.get("userId")
+    const user = await getOrCreateUser(userId)
+    
     const body = await req.json()
     const { name, email } = body
 
