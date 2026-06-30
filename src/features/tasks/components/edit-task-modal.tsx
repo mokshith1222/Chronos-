@@ -1,0 +1,244 @@
+"use client"
+
+import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { taskSchema, TaskInput } from "@/lib/validations/task"
+import { useUpdateTask } from "@/hooks/use-tasks-queries"
+import { useProjects } from "@/hooks/use-projects-queries"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Loader2, Calendar as CalendarIcon } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+
+interface EditTaskModalProps {
+  task: any | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function EditTaskModal({ task, open, onOpenChange }: EditTaskModalProps) {
+  const updateTask = useUpdateTask()
+  const { data: projects } = useProjects()
+  
+  const form = useForm<TaskInput>({
+    resolver: zodResolver(taskSchema) as any,
+    defaultValues: {
+      title: "",
+      description: "",
+      status: "TODO",
+      priority: "NO_PRIORITY",
+      projectId: null,
+      estimatedTime: null,
+      dueDate: null,
+    }
+  })
+
+  useEffect(() => {
+    if (task) {
+      form.reset({
+        title: task.title,
+        description: task.description || "",
+        status: task.status,
+        priority: task.priority,
+        projectId: task.projectId || null,
+        estimatedTime: task.estimatedTime || null,
+        dueDate: task.dueDate || null,
+      })
+    }
+  }, [task, form])
+
+  const onSubmit = (data: TaskInput) => {
+    if (!task) return
+    updateTask.mutate({ id: task.id, data }, {
+      onSuccess: () => {
+        onOpenChange(false)
+      }
+    })
+  }
+
+  const selectedDate = form.watch("dueDate")
+
+  if (!task) return null
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Edit Task</DialogTitle>
+          <DialogDescription>
+            Update details of your task.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4 pt-2">
+          <div className="space-y-1">
+            <Label htmlFor="edit-title">Task Title</Label>
+            <Input
+              id="edit-title"
+              placeholder="e.g. Design landing page"
+              {...form.register("title")}
+              disabled={updateTask.isPending}
+            />
+            {form.formState.errors.title && (
+              <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="edit-description">Description</Label>
+            <Textarea
+              id="edit-description"
+              placeholder="Add details about this task..."
+              rows={3}
+              {...form.register("description")}
+              disabled={updateTask.isPending}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label>Status</Label>
+              <Select 
+                disabled={updateTask.isPending} 
+                value={form.watch("status")} 
+                onValueChange={(val: any) => form.setValue("status", val, { shouldDirty: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BACKLOG">Backlog</SelectItem>
+                  <SelectItem value="TODO">Todo</SelectItem>
+                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                  <SelectItem value="DONE">Done</SelectItem>
+                  <SelectItem value="CANCELED">Canceled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label>Priority</Label>
+              <Select 
+                disabled={updateTask.isPending} 
+                value={form.watch("priority")} 
+                onValueChange={(val: any) => form.setValue("priority", val, { shouldDirty: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NO_PRIORITY">No Priority</SelectItem>
+                  <SelectItem value="LOW">Low</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
+                  <SelectItem value="HIGH">High</SelectItem>
+                  <SelectItem value="URGENT">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label>Project</Label>
+              <Select 
+                disabled={updateTask.isPending} 
+                value={form.watch("projectId") || "none"} 
+                onValueChange={(val) => form.setValue("projectId", val === "none" ? null : val, { shouldDirty: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue>
+                    {form.watch("projectId")
+                      ? (projects?.find((p: any) => p.id === form.watch("projectId"))?.name || "No Project")
+                      : "No Project"
+                    }
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" label="No Project">No Project</SelectItem>
+                  {projects?.map((project: any) => (
+                    <SelectItem key={project.id} value={project.id} label={project.name}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1 flex flex-col">
+              <Label className="mb-1">Due Date</Label>
+              <Popover>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-9",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                      disabled={updateTask.isPending}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedDate ? format(new Date(selectedDate), "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  }
+                />
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate ? new Date(selectedDate) : undefined}
+                    onSelect={(date) => form.setValue("dueDate", date ? date.toISOString() : null, { shouldDirty: true })}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="edit-estimatedTime">Estimate (Minutes)</Label>
+            <Input
+              id="edit-estimatedTime"
+              type="number"
+              placeholder="e.g. 60"
+              value={form.watch("estimatedTime") || ""}
+              disabled={updateTask.isPending}
+              onChange={(e) => {
+                const val = e.target.value ? parseInt(e.target.value, 10) : null
+                form.setValue("estimatedTime", val, { shouldDirty: true })
+              }}
+            />
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={updateTask.isPending}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={updateTask.isPending || !form.formState.isDirty}>
+              {updateTask.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}

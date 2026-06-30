@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /projects/
+Disallow: /tasks/
+Disallow: /time/
+Disallow: /calendar/
+Disallow: /notes/
+Disallow: /goals/
+
+Sitemap: https://chronos.example.com/sitemap.xml
