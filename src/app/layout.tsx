@@ -15,14 +15,14 @@ export const metadata: Metadata = {
     template: "%s | Chronos"
   },
   description: "Chronos is an enterprise-grade time tracking, task management, and productivity analytics platform designed for high-performance teams.",
-  metadataBase: new URL("https://chronos.example.com"),
+  metadataBase: new URL("https://chronos-lime-six.vercel.app"),
   alternates: {
     canonical: "/"
   },
   openGraph: {
     title: "Chronos | Advanced Productivity & Time Tracking",
     description: "Enterprise-grade time tracking, task management, and productivity analytics.",
-    url: "https://chronos.example.com",
+    url: "https://chronos-lime-six.vercel.app",
     siteName: "Chronos",
     locale: "en_US",
     type: "website"

@@ -68,8 +68,8 @@ export default function MarketingLandingPage() {
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://chronos.example.com/#website",
-        "url": "https://chronos.example.com/",
+        "@id": "https://chronos-lime-six.vercel.app/#website",
+        "url": "https://chronos-lime-six.vercel.app/",
         "name": "Chronos",
         "description": "Standalone Time Tracker & Productivity Platform",
         "publisher": {
@@ -79,7 +79,7 @@ export default function MarketingLandingPage() {
       },
       {
         "@type": "SoftwareApplication",
-        "@id": "https://chronos.example.com/#software",
+        "@id": "https://chronos-lime-six.vercel.app/#software",
         "name": "Chronos",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
@@ -91,7 +91,7 @@ export default function MarketingLandingPage() {
       },
       {
         "@type": "FAQPage",
-        "@id": "https://chronos.example.com/#faq",
+        "@id": "https://chronos-lime-six.vercel.app/#faq",
         "mainEntity": faqItems.map((item) => ({
           "@type": "Question",
           "name": item.question,
