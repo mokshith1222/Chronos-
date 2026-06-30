@@ -207,7 +207,7 @@ export default function MarketingLandingPage() {
               <div className="flex-1 flex flex-col gap-4 py-2 overflow-hidden">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <h3 className="text-base font-bold">Workspace Dashboard</h3>
+                    <p className="text-base font-bold">Workspace Dashboard</p>
                     <p className="text-[11px] text-muted-foreground">Monitor your deep work focus hours.</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -222,7 +222,7 @@ export default function MarketingLandingPage() {
                   <div className="bg-card/40 border border-border/50 rounded-xl p-4 flex flex-col justify-between shadow-sm">
                     <div>
                       <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Active Session</span>
-                      <h4 className="text-sm font-bold mt-1 truncate">Refactoring Landing Page</h4>
+                      <p className="text-sm font-bold mt-1 truncate">Refactoring Landing Page</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">Project: Chronos Suite</p>
                     </div>
                     <div className="my-3 font-mono text-3xl font-black text-foreground">01:14:52</div>
