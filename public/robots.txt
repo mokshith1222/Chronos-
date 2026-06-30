@@ -10,4 +10,4 @@ Disallow: /calendar/
 Disallow: /notes/
 Disallow: /goals/
 
-Sitemap: https://chronos.example.com/sitemap.xml
+Sitemap: https://chronos-lime-six.vercel.app/sitemap.xml
