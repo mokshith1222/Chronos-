@@ -28,8 +28,8 @@ export function ProjectsToolbar({ onNewProject }: ProjectsToolbarProps) {
         />
       </div>
 
-      <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
-        <div className="flex items-center p-1 bg-muted/50 rounded-lg border">
+      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto pb-2 sm:pb-0">
+        <div className="flex items-center p-1 bg-muted/50 rounded-lg border shrink-0">
           <Button
             variant={viewMode === "grid" ? "default" : "ghost"}
             size="sm"
@@ -48,14 +48,14 @@ export function ProjectsToolbar({ onNewProject }: ProjectsToolbarProps) {
           </Button>
         </div>
 
-        <Button variant="outline" size="sm" className="h-9">
+        <Button variant="outline" size="sm" className="h-9 shrink-0">
           <Filter className="h-4 w-4 mr-2" />
           Filters
         </Button>
 
         <ProjectExportButton />
 
-        <Button size="sm" className="h-9 ml-auto sm:ml-0" onClick={onNewProject}>
+        <Button size="sm" className="h-9 shrink-0" onClick={onNewProject}>
           New Project
         </Button>
       </div>
