@@ -74,11 +74,11 @@ export function TimeModes() {
                 key={tab.id}
                 variant={activeTab === tab.id ? "default" : "ghost"}
                 size="sm"
-                className="flex-1 h-8 text-xs gap-1.5"
+                className="flex-1 h-8 text-[10px] sm:text-xs gap-1 sm:gap-1.5 px-1.5 sm:px-3"
                 onClick={() => setActiveTab(tab.id)}
               >
-                <Icon className="h-3.5 w-3.5" />
-                {tab.label}
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span>{tab.label}</span>
               </Button>
             )
           })}
