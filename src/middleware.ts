@@ -23,6 +23,12 @@ function isRateLimited(ip: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  // 0. Bypass middleware completely for SEO files (to prevent Supabase timeouts for Googlebot)
+  const pathname = request.nextUrl.pathname
+  if (pathname.endsWith('.xml') || pathname.endsWith('.txt')) {
+    return NextResponse.next()
+  }
+
   // 1. Rate Limiting for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1'
@@ -101,9 +107,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - sitemap.xml (SEO sitemap - must be publicly accessible)
-     * - robots.txt (SEO robots file - must be publicly accessible)
+     * - sitemap.xml, sitemap_index.xml (SEO sitemap)
+     * - robots.txt (SEO robots file)
      */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|sitemap_index.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
