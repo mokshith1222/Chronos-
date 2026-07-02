@@ -1,5 +1,4 @@
 User-agent: *
-Allow: /
 Disallow: /api/
 Disallow: /dashboard/
 Disallow: /settings/
@@ -10,4 +9,4 @@ Disallow: /calendar/
 Disallow: /notes/
 Disallow: /goals/
 
-Sitemap: https://chronos-lime-six.vercel.app/sitemap.xml
+Sitemap: https://chronos-lime-six.vercel.app/sitemap_index.xml
